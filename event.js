@@ -10,7 +10,7 @@ function openForm1() {
     // using innerHTML
     container.innerHTML += `
     <form id="F1">
-        <input type="number" id="sub_COUNT" placeholder="Total number of subjects" required
+        <input type="number" id="sub_COUNT" placeholder="Enter total number of subjects" required
             min='1' max='10'>
         <button class='formButton'>Next</button>
     </form>
@@ -41,7 +41,7 @@ function openForm2(count) {
         const div = document.createElement('div');
         div.className = 'subjects';
         div.innerHTML = `
-        <p style="width:30px">${i + 1}.</p>`;
+        <p">${i + 1}.</p>`;
 
         // grade input
         div.appendChild(get_G_Select_Inp('g' + i));
@@ -66,10 +66,13 @@ function calculate(count) {
 
     let total_credits = 0;
     let total_sum = 0;
+    let pass = true;
     for (let i = 0; i < count; i++) {
         // string to number
         const grade = Number(document.querySelector('#g' + i).value);
         const credit = Number(document.querySelector('#c' + i).value);
+
+        !grade && (pass = false);
 
         total_credits += credit;
         total_sum += (grade * credit);
@@ -77,20 +80,21 @@ function calculate(count) {
 
     let sgpa = total_sum / total_credits;
     // 2 decimal
-    sgpa = Math.ceil(sgpa * 100);
+    sgpa = Math.ceil(sgpa * 100) / 10;
 
     const resultDiv = document.createElement('div');
     resultDiv.className = 'resultDiv';
-    resultDiv.onclick = () => animateResult(sgpa / 10);
+    resultDiv.onclick = () => animateResult(sgpa, pass);
 
     resultDiv.innerHTML = `
         <div class="result">
+            <bar class='bar'></bar>
             <span id="sgpa"></span>
         </div>
         <h2>SGPA</h2>
     `;
     container.append(resultDiv);
-    animateResult(sgpa / 10);
+    animateResult(sgpa, pass);
 }
 
 document.querySelector('.back').addEventListener('click', () => {
@@ -109,28 +113,52 @@ document.querySelector('.back').addEventListener('click', () => {
 // other functions
 
 
-function animateResult(sgpa) {
+function animateResult(sgpa, p_f) {
     clearInterval(progress);
     let x = 0, deg = 0;
     const result = document.querySelector('.result');
     const sgpa_span = document.querySelector('#sgpa');
-    const speed = 3;
-    const Interval = 50;
+    const speed = 3.1;
+    const Interval = 40;
 
     progress = setInterval(() => {
+
+        document.querySelector(':root').style.setProperty('--pf-color', '#009400');
+        document.querySelector(':root').style.setProperty('--sgpa-color', '#00b8a3');
+
         x += speed;
         deg = (x * 3.6);
         sgpa_span.innerText = (x / 10).toFixed(2);
-
+        // #cadcff
         result.style.background = `conic-gradient(
-            #4d5bf9 ${deg}deg, #cadcff ${deg}deg
+            var(--pf-color) ${deg}deg, #294d35 ${deg}deg
         )`;
 
         if (x >= sgpa) {
+            if (!p_f) {
+                document.querySelector(':root').style.setProperty('--pf-color', '#d62828');
+                document.querySelector(':root').style.setProperty('--sgpa-color', '#a64739');
+            }
+
+            deg = (sgpa * 3.6);
+            result.style.background = `conic-gradient(
+                var(--pf-color) ${deg}deg, #294d35 ${deg}deg
+            )`
+
             sgpa_span.innerText = (sgpa / 10).toFixed(2);
+            sgpa_span.innerHTML += `
+                <p class='p-f scale'>${p_f ? 'Pass' : 'Fail'}</p>`;
+
+            helper();
             clearInterval(progress);
         }
     }, Interval);
+}
+
+function helper() {
+    setTimeout(() => {
+        document.querySelector('.p-f').classList.remove('scale');
+    }, 20);
 }
 
 function get_G_Select_Inp(id) {
@@ -138,6 +166,7 @@ function get_G_Select_Inp(id) {
     select.required = true;
     select.id = id;
     select.innerHTML = `
+        <option value="">Grade</option>
         <option value="10">S</option>
         <option value="9">A</option>
         <option value="8">B</option>
@@ -153,8 +182,9 @@ function get_C_Select_Inp(id) {
     const select = document.createElement('select');
     select.required = true;
     select.id = id;
-
-    for (let i = 10; i >= 0; i -= 0.5) {
+    select.innerHTML = `
+    <option value="">Credit</option>`;
+    for (let i = 0.5; i <= 10; i += 0.5) {
         select.innerHTML += `
         <option value="${i}">${i}</option>`;
     }
