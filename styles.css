@@ -19,6 +19,7 @@
     margin: 0px;
     transition: 200ms;
     font-family: 'Poppins', 'Roboto', sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -78,7 +79,7 @@ button {
     padding: 10px 15px;
     color: #e4e4e4;
     background-color: #009400;
-    box-shadow: inset 0px -2px 5px 0px #000;
+    box-shadow: inset 0px -2px 3px 0px #000;
 }
 
 button:active {
@@ -210,7 +211,7 @@ form {
     font-size: medium;
 }
 
-.scale{
+.scale {
     scale: 0.5;
 }
 
